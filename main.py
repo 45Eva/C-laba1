@@ -64,6 +64,12 @@ def process_dash_file(filename):
     h1_entropy = calculate_entropy(frequencies)
     print(f'\nЕнтропія H1 для файлу {filename}: {h1_entropy:.5f}')
 
+    h2_entropy_with_cross = calculate_bigram_entropy(dash_bigrams_with_cross)
+    print(f'\nЕнтропія H2 для біграм з перетином у файлі {filename}: {h2_entropy_with_cross:.5f}')
+
+    h2_entropy_without_cross = calculate_bigram_entropy(dash_bigrams_without_cross)
+    print(f'\nЕнтропія H2 для біграм без перетину у файлі {filename}: {h2_entropy_without_cross:.5f}')
+
 
 def process_without_dash_file(filename):
     with open(filename, 'r', encoding='utf-8') as f:
@@ -94,6 +100,12 @@ def process_without_dash_file(filename):
 
     h1_entropy = calculate_entropy(frequencies)
     print(f'\nЕнтропія H1 для файлу {filename}: {h1_entropy:.5f}')
+
+    h2_entropy_with_cross = calculate_bigram_entropy(without_dash_bigrams_with_cross)
+    print(f'\nЕнтропія H2 для біграм з перетином у файлі {filename}: {h2_entropy_with_cross:.5f}')
+
+    h2_entropy_without_cross = calculate_bigram_entropy(without_dash_bigrams_without_cross)
+    print(f'\nЕнтропія H2 для біграм без перетину у файлі {filename}: {h2_entropy_without_cross:.5f}')
 
 
 def count_bigrams(text, with_cross=True):
@@ -130,6 +142,10 @@ def print_bigram_matrix(bigram_frequencies):
 
 def calculate_entropy(frequencies):
     return -sum(p * math.log2(p) for p in frequencies.values() if p > 0)
+
+
+def calculate_bigram_entropy(bigram_frequencies):
+    return -0.5 * sum(p * math.log2(p) for p in bigram_frequencies.values() if p > 0)
 
 
 if __name__ == "__main__":
