@@ -1,6 +1,6 @@
 import os
 import re
-from collections import Counter
+from collections import Counter, defaultdict
 
 
 def process_file(filename):
@@ -56,6 +56,18 @@ def process_dash_file(filename):
     for char, freq in sorted_frequencies:
         print(f'Символ: {char} | Кількість: {counter[char]} | Частота: {freq:.5f}')
 
+    # Підрахунок біграм
+    dash_bigrams_with_cross, dash_total_bigrams_with_cross = count_bigrams(content, with_cross=True)
+    dash_bigrams_without_cross, dash_total_bigrams_without_cross = count_bigrams(content, with_cross=False)
+
+    print(f'\nЗагальна кількість біграм з перетином у файлі {filename}: {dash_total_bigrams_with_cross}')
+    print(f'Матриця біграм з перетином для файлу {filename}:\n')
+    print_bigram_matrix(dash_bigrams_with_cross)
+
+    print(f'\nЗагальна кількість біграм без перетину у файлі {filename}: {dash_total_bigrams_without_cross}')
+    print(f'Матриця біграм без перетину для файлу {filename}:\n')
+    print_bigram_matrix(dash_bigrams_without_cross)
+
 
 def process_without_dash_file(filename):
     with open(filename, 'r', encoding='utf-8') as f:
@@ -71,6 +83,52 @@ def process_without_dash_file(filename):
     print(f'Таблиця частот символів для файлу {filename}:\n')
     for char, freq in sorted_frequencies:
         print(f'Символ: {char} | Кількість: {counter[char]} | Частота: {freq:.5f}')
+
+    # Підрахунок біграм
+    without_dash_bigrams_with_cross, without_dash_total_bigrams_with_cross = count_bigrams(content, with_cross=True)
+    without_dash_bigrams_without_cross, without_dash_total_bigrams_without_cross = count_bigrams(content,
+                                                                                                 with_cross=False)
+
+    print(f'\nЗагальна кількість біграм з перетином у файлі {filename}: {without_dash_total_bigrams_with_cross}')
+    print(f'Матриця біграм з перетином для файлу {filename}:\n')
+    print_bigram_matrix(without_dash_bigrams_with_cross)
+
+    print(f'\nЗагальна кількість біграм без перетину у файлі {filename}: {without_dash_total_bigrams_without_cross}')
+    print(f'Матриця біграм без перетину для файлу {filename}:\n')
+    print_bigram_matrix(without_dash_bigrams_without_cross)
+
+
+def count_bigrams(text, with_cross=True):
+    bigram_counter = defaultdict(int)
+    total_bigrams = 0
+    step = 1 if with_cross else 2
+
+    for i in range(0, len(text) - 1, step):
+        bigram = text[i:i + 2]
+        if len(bigram) == 2:
+            bigram_counter[bigram] += 1
+            total_bigrams += 1
+
+    # Підрахунок ймовірностей
+    bigram_frequencies = {bigram: count / total_bigrams for bigram, count in bigram_counter.items()}
+
+    return bigram_frequencies, total_bigrams
+
+
+def print_bigram_matrix(bigram_frequencies):
+    alphabet = list(' абвгдеёжзийклмнопрстуфхцчшщъыьэюя')
+    size = len(alphabet)
+    matrix = [[0.0] * size for _ in range(size)]
+
+    for bigram, freq in bigram_frequencies.items():
+        first_char, second_char = bigram
+        i = alphabet.index(first_char)
+        j = alphabet.index(second_char)
+        matrix[i][j] = freq
+
+    print('  ' + ' '.join(alphabet))
+    for i, row in enumerate(matrix):
+        print(alphabet[i] + ' ' + ' '.join(f'{cell:.5f}' for cell in row))
 
 
 if __name__ == "__main__":
