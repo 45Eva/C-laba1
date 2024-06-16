@@ -1,33 +1,29 @@
 import os
 import re
+import math
 from collections import Counter, defaultdict
 
 
 def process_file(filename):
-    # Перевірка розширення файлу
     if not filename.endswith('.txt'):
         print("Я приймаю тільки файл з txt розширенням")
         return
 
-    # Перевірка розміру файлу
-    if os.path.getsize(filename) < 1 * 1024 * 1024:  # 1 МБ
+    if os.path.getsize(filename) < 1 * 1024 * 1024:
         print("Я приймаю файли 1Мб або більше , додайте більше текст :)")
         return
 
     with open(filename, 'r', encoding='utf-8') as f:
         content = f.read()
 
-    # Фільтрація тексту
-    filtered_content = re.sub(r'[^а-яА-ЯёЁ ]+', ' ', content)  # залишаємо тільки символи російської мови та пробіли
-    filtered_content = re.sub(r'\s+', ' ', filtered_content)  # послідовність пробілів замінюємо на один пробіл
-    filtered_content = filtered_content.lower()  # замінюємо прописні літери на стрічні
+    filtered_content = re.sub(r'[^а-яА-ЯёЁ ]+', ' ', content)
+    filtered_content = re.sub(r'\s+', ' ', filtered_content)
+    filtered_content = filtered_content.lower()
 
-    # Створення Dash+filename.txt
     dash_filename = 'Dash-' + os.path.basename(filename)
     with open(dash_filename, 'w', encoding='utf-8') as f:
         f.write(filtered_content)
 
-    # Створення WithoutDash+filename.txt
     without_dash_filename = 'WithoutDash-' + os.path.basename(filename)
     filtered_content_no_spaces = filtered_content.replace(' ', '')
     with open(without_dash_filename, 'w', encoding='utf-8') as f:
@@ -35,9 +31,7 @@ def process_file(filename):
 
     print(f'Файли "{dash_filename}" та "{without_dash_filename}" створені.')
 
-    # Обробка файлу Dash
     process_dash_file(dash_filename)
-    # Обробка файлу WithoutDash
     process_without_dash_file(without_dash_filename)
 
 
@@ -56,7 +50,6 @@ def process_dash_file(filename):
     for char, freq in sorted_frequencies:
         print(f'Символ: {char} | Кількість: {counter[char]} | Частота: {freq:.5f}')
 
-    # Підрахунок біграм
     dash_bigrams_with_cross, dash_total_bigrams_with_cross = count_bigrams(content, with_cross=True)
     dash_bigrams_without_cross, dash_total_bigrams_without_cross = count_bigrams(content, with_cross=False)
 
@@ -67,6 +60,9 @@ def process_dash_file(filename):
     print(f'\nЗагальна кількість біграм без перетину у файлі {filename}: {dash_total_bigrams_without_cross}')
     print(f'Матриця біграм без перетину для файлу {filename}:\n')
     print_bigram_matrix(dash_bigrams_without_cross)
+
+    h1_entropy = calculate_entropy(frequencies)
+    print(f'\nЕнтропія H1 для файлу {filename}: {h1_entropy:.5f}')
 
 
 def process_without_dash_file(filename):
@@ -84,7 +80,6 @@ def process_without_dash_file(filename):
     for char, freq in sorted_frequencies:
         print(f'Символ: {char} | Кількість: {counter[char]} | Частота: {freq:.5f}')
 
-    # Підрахунок біграм
     without_dash_bigrams_with_cross, without_dash_total_bigrams_with_cross = count_bigrams(content, with_cross=True)
     without_dash_bigrams_without_cross, without_dash_total_bigrams_without_cross = count_bigrams(content,
                                                                                                  with_cross=False)
@@ -96,6 +91,9 @@ def process_without_dash_file(filename):
     print(f'\nЗагальна кількість біграм без перетину у файлі {filename}: {without_dash_total_bigrams_without_cross}')
     print(f'Матриця біграм без перетину для файлу {filename}:\n')
     print_bigram_matrix(without_dash_bigrams_without_cross)
+
+    h1_entropy = calculate_entropy(frequencies)
+    print(f'\nЕнтропія H1 для файлу {filename}: {h1_entropy:.5f}')
 
 
 def count_bigrams(text, with_cross=True):
@@ -109,7 +107,6 @@ def count_bigrams(text, with_cross=True):
             bigram_counter[bigram] += 1
             total_bigrams += 1
 
-    # Підрахунок ймовірностей
     bigram_frequencies = {bigram: count / total_bigrams for bigram, count in bigram_counter.items()}
 
     return bigram_frequencies, total_bigrams
@@ -129,6 +126,10 @@ def print_bigram_matrix(bigram_frequencies):
     print('  ' + ' '.join(alphabet))
     for i, row in enumerate(matrix):
         print(alphabet[i] + ' ' + ' '.join(f'{cell:.5f}' for cell in row))
+
+
+def calculate_entropy(frequencies):
+    return -sum(p * math.log2(p) for p in frequencies.values() if p > 0)
 
 
 if __name__ == "__main__":
