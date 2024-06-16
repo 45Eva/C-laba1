@@ -1,5 +1,6 @@
 import os
 import re
+from collections import Counter
 
 
 def process_file(filename):
@@ -33,6 +34,43 @@ def process_file(filename):
         f.write(filtered_content_no_spaces)
 
     print(f'Файли "{dash_filename}" та "{without_dash_filename}" створені.')
+
+    # Обробка файлу Dash
+    process_dash_file(dash_filename)
+    # Обробка файлу WithoutDash
+    process_without_dash_file(without_dash_filename)
+
+
+def process_dash_file(filename):
+    with open(filename, 'r', encoding='utf-8') as f:
+        content = f.read()
+
+    total_chars = len(content)
+    counter = Counter(content)
+    frequencies = {char: count / total_chars for char, count in counter.items()}
+
+    sorted_frequencies = sorted(frequencies.items(), key=lambda item: item[1], reverse=True)
+
+    print(f'\nЗагальна кількість символів у тексті файлу {filename}: {total_chars}')
+    print(f'Таблиця частот символів для файлу {filename}:\n')
+    for char, freq in sorted_frequencies:
+        print(f'Символ: {char} | Кількість: {counter[char]} | Частота: {freq:.5f}')
+
+
+def process_without_dash_file(filename):
+    with open(filename, 'r', encoding='utf-8') as f:
+        content = f.read()
+
+    total_chars = len(content)
+    counter = Counter(content)
+    frequencies = {char: count / total_chars for char, count in counter.items()}
+
+    sorted_frequencies = sorted(frequencies.items(), key=lambda item: item[1], reverse=True)
+
+    print(f'\nЗагальна кількість символів у тексті файлу {filename}: {total_chars}')
+    print(f'Таблиця частот символів для файлу {filename}:\n')
+    for char, freq in sorted_frequencies:
+        print(f'Символ: {char} | Кількість: {counter[char]} | Частота: {freq:.5f}')
 
 
 if __name__ == "__main__":
